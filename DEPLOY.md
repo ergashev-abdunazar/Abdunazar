@@ -23,7 +23,7 @@ apt-get install -y unzip && cd /opt && unzip taklifnoma-studiyasi.zip && cd takl
 ```bash
 cp deploy/.env.example .env
 nano .env        # DOMAIN, BASE_URL, SITE_DOMAIN va ADMIN_PASSWORD ni yozing
-mkdir -p data && chown 1000:1000 data
+mkdir -p data
 ```
 `ADMIN_PASSWORD` — o'zingiz o'ylab topgan uzun parol (kamida 10 belgi). Bo'sh qoldirsangiz, tasodifiy parol `data/admin-first-password.txt` ga yoziladi.
 
