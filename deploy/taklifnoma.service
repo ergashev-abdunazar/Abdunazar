@@ -1,0 +1,19 @@
+# Docker'siz variant (Ubuntu): sudo cp deploy/taklifnoma.service /etc/systemd/system/ ; sudo systemctl enable --now taklifnoma
+[Unit]
+Description=Taklifnoma Studiyasi
+After=network.target
+
+[Service]
+User=taklifnoma
+WorkingDirectory=/opt/taklifnoma
+EnvironmentFile=/opt/taklifnoma/.env
+Environment=NODE_ENV=production PORT=3000 HOST=127.0.0.1 TRUST_PROXY=1 DATA_DIR=/opt/taklifnoma/data
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/taklifnoma/data
+
+[Install]
+WantedBy=multi-user.target

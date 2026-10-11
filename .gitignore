@@ -427,3 +427,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Taklifnoma
+data/*
+!data/.gitkeep
+node_modules
+.env
+*.zip

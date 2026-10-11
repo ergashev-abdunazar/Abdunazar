@@ -1,0 +1,8 @@
+# Caddy HTTPS sertifikatni (Let's Encrypt) o'zi oladi va yangilaydi.
+{$DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 100MB
+	}
+	reverse_proxy app:3000
+}

@@ -1,0 +1,13 @@
+{
+  "name": "taklifnoma-studiyasi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Onlayn taklifnoma yaratuvchi: shablonlar, PNG/JPG/PDF/video eksport, jonli havola, QR, RSVP",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "PORT=3000 DEMO_PAY=1 PROMO_CODES='DEMO=img:5,video:5,bulk:5' node server.js",
+    "test": "node test/qr-test.mjs && node test/qr-test2.mjs && node test/audio-test.mjs"
+  }
+}

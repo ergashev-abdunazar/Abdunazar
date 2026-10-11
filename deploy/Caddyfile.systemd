@@ -1,0 +1,8 @@
+# Docker'siz variant uchun: /etc/caddy/Caddyfile (domenni o'zingiznikiga almashtiring)
+taklifnoma.example.uz {
+	encode zstd gzip
+	request_body {
+		max_size 100MB
+	}
+	reverse_proxy 127.0.0.1:3000
+}

@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0"><canvas id="c"></canvas>
+<script type="module">
+import { newState, normalizeState, switchLang } from '/public/js/state.js';
+import * as EX from '/public/js/exporters.js';
+import * as V from '/public/js/video.js';
+import { createAnimator } from '/public/js/anim.js';
+import { FORMATS } from '/public/js/render.js';
+import { ensureFonts } from '/public/js/fonts.js';
+function mkS(o) {
+  let S = newState(o.type || 'nikoh', 'lat');
+  if (o.lang && o.lang !== 'lat') S = switchLang(S, o.lang);
+  return normalizeState({ ...S, tpl: o.tpl || S.tpl, ...(o.patch || {}) });
+}
+const b64 = async (blob) => { const ab = await blob.arrayBuffer(); let s = ''; const u = new Uint8Array(ab); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+window.T = {
+  async img(o) { const r = await EX.exportImage(mkS(o), o.ex || {}); return { w: r.width, h: r.height, name: r.name, d: await b64(r.blob) }; },
+  async pdf(o) { const b = await EX.exportPdf(mkS(o), o.ex || {}); return { d: await b64(b), size: b.size }; },
+  async zip(o) { const b = await EX.exportBulkZip(mkS(o), o.guests, o.ex || {}); return { d: await b64(b), size: b.size }; },
+  async frame(o) { const S = mkS(o); await EX.prepare(S); const fmt = FORMATS[o.fmt || 'story']; const a = createAnimator(S, fmt, { duration: o.dur || 15, ...(o.an || {}) }); const c = document.getElementById('c'); c.width = fmt.w; c.height = fmt.h; a.draw(c.getContext('2d'), o.t); return c.toDataURL('image/png'); },
+  async video(o) {
+    const S = mkS(o);
+    const audio = await V.buildAudio(o.dur, { preset: o.music || 'nozik' });
+    const t0 = performance.now();
+    const r = await V.recordVideo(S, { fmt: o.fmt || 'story', duration: o.dur, quality: o.q || 'sd', audio, ...(o.ex || {}) });
+    return { ext: r.ext, mime: r.mime, w: r.width, h: r.height, ms: performance.now() - t0, d: await b64(r.blob) };
+  },
+  mime: () => V.pickVideoMime()
+};
+window.READY = true;
+</script>

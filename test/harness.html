@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#888"><canvas id="c"></canvas>
+<script type="module">
+import { newState, normalizeState, switchLang, switchType } from '/public/js/state.js';
+import { FORMATS } from '/public/js/layout.js';
+import { renderStatic } from '/public/js/render.js';
+import { TEMPLATES, TEMPLATE_ORDER } from '/public/js/templates.js';
+import { TYPES } from '/public/js/i18n.js';
+window.H = {
+  TEMPLATE_ORDER, TYPES: Object.keys(TYPES),
+  draw(o) {
+    let S = newState(o.type || 'nikoh', 'lat');
+    if (o.lang && o.lang !== 'lat') S = switchLang(S, o.lang);
+    S = { ...S, tpl: o.tpl || S.tpl, pal: o.pal || 0, ...(o.patch || {}) };
+    S = normalizeState(S);
+    const fmt = FORMATS[o.fmt || 'story'];
+    const c = document.getElementById('c'); c.width = fmt.w; c.height = fmt.h;
+    renderStatic(c.getContext('2d'), S, fmt, o.render || {});
+    return c.toDataURL('image/png');
+  }
+};
+window.READY = true;
+</script>

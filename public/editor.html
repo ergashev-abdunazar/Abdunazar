@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muharrir — Taklifnoma Studiyasi</title>
+<meta name="theme-color" content="#7b1f4f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237b1f4f'/%3E%3Cpath d='M16 7l2.6 5.6 6 .7-4.4 4.1 1.2 6L16 20.4 10.6 23.4l1.2-6L7.4 13.3l6-.7z' fill='%23f3c969'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="editor">
+<header class="topbar">
+  <a class="logo" href="/" aria-label="Bosh sahifa"><b>✦</b><span class="name">Taklifnoma</span></a>
+  <button class="icon-btn" id="undo" title="Bekor qilish (Ctrl+Z)" aria-label="Bekor qilish" disabled>↶</button>
+  <button class="icon-btn" id="redo" title="Qaytarish (Ctrl+Y)" aria-label="Qaytarish" disabled>↷</button>
+  <span class="sp"></span>
+  <span class="badge" id="saved" aria-live="polite">Saqlandi</span>
+  <button class="btn small" id="works">Ishlarim</button>
+  <button class="btn primary small" id="goDl">Yuklash ⬇</button>
+</header>
+<main class="workspace">
+  <section class="stage-wrap" aria-label="Ko'rinish">
+    <div class="stage" id="stageBox"><canvas id="stage" tabindex="0" aria-label="Taklifnoma ko'rinishi"></canvas></div>
+    <div class="fmtbar" id="fmtbar" role="tablist" aria-label="Format"></div>
+  </section>
+  <section class="panel">
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+    <div class="tab-body" id="tabBody"></div>
+  </section>
+</main>
+<script type="module" src="/js/editor.js"></script>
+</body>
+</html>

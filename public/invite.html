@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120d1c">
+<!--OG-->
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="invite">
+<div class="env" id="env" hidden>
+  <div>
+    <div class="envelope" aria-hidden="true"><div class="body"></div><div class="tri"></div><div class="flap"></div><div class="seal">♥</div></div>
+    <h1 id="envTitle"></h1>
+    <p id="envSub"></p>
+    <button class="btn gold" id="openBtn" disabled>…</button>
+  </div>
+</div>
+<button class="mute" id="mute" hidden aria-label="Ovoz">🔊</button>
+<main id="app" hidden>
+  <section class="hero-stage" id="hero"><canvas id="cv" aria-label="Taklifnoma"></canvas><div class="scroll-hint" id="hint"></div></section>
+  <section class="sections" id="sections"><div class="in" id="in"></div></section>
+</main>
+<div class="center-msg" id="nf" hidden><div><h1>Taklifnoma topilmadi</h1><p>Havola noto'g'ri yoki taklifnoma o'chirilgan.</p><a class="btn primary" href="/">Bosh sahifa</a></div></div>
+<script type="module" src="/js/invite.js"></script>
+</body>
+</html>
