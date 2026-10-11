@@ -61,7 +61,8 @@ export function newState(type = 'nikoh', lang = 'lat') {
     msg: d.msg,
     items: [],
     link: null,
-    music: { preset: 'nozik' }
+    music: { preset: 'nozik' },
+    extra: {}
   };
 }
 
@@ -124,6 +125,7 @@ export function normalizeState(raw) {
   if (!S.custom) S.custom = {};
   if (!S.fonts) S.fonts = {};
   if (!S.music) S.music = { preset: 'nozik' };
+  if (!S.extra || typeof S.extra !== 'object') S.extra = {};
   const pals = TEMPLATES[S.tpl].pals.length;
   if (!(S.pal >= 0 && S.pal < pals)) S.pal = 0;
   return S;

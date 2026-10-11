@@ -8,7 +8,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { Store } from './lib/store.js';
 import { sanitizeState, validSlug, TPLS } from './lib/sanitize.js';
-import { loadAdmin, checkPassword, signSession, verifySession, sanitizeTemplate } from './lib/admin.js';
+import { loadAdmin, checkPassword, signSession, verifySession, sanitizeTemplate, hashPassword } from './lib/admin.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUB = path.join(ROOT, 'public');
@@ -128,7 +128,18 @@ function getUser(req, res) {
   return u;
 }
 const KINDS = ['img', 'video', 'bulk'];
-const meView = (u, adm) => ({ cid: u.cid, credits: u.credits, unlocked: u.unlocked, refCode: u.refCode, admin: !!adm });
+const meView = (u, adm) => ({ cid: u.cid, credits: u.credits, unlocked: u.unlocked, refCode: u.refCode, admin: !!adm, email: u.email || null });
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
+const cidCookie = (cid, maxAge = 3600 * 24 * 365 * 2) => `cid=${cid}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${BASE_URL.startsWith('https') ? '; Secure' : ''}`;
+/** Anonim foydalanuvchining kredit, ochilgan va taklifnomalarini hisobga ko'chiradi. */
+function mergeUsers(from, to) {
+  if (!from || !to || from.cid === to.cid || from.email) return;
+  KINDS.forEach((k) => { to.credits[k] = (to.credits[k] || 0) + (from.credits[k] || 0); from.credits[k] = 0; });
+  Object.entries(from.unlocked || {}).forEach(([d, kinds]) => { to.unlocked[d] = [...new Set([...(to.unlocked[d] || []), ...kinds])]; });
+  from.unlocked = {};
+  Object.values(db.invites).forEach((i) => { if (i.owner === from.cid) i.owner = to.cid; });
+}
+const canEdit = (req, inv, user) => checkToken(req, inv) || (!!user && inv.owner === user.cid);
 
 function grantUnlock(u, design, kind) {
   const set = new Set(u.unlocked[design] || []); set.add(kind); u.unlocked[design] = [...set];
@@ -170,7 +181,7 @@ function convertVideo(input, ext) {
 }
 
 async function api(req, res, url) {
-  const p = url.pathname; const m = req.method;
+  const p = url.pathname; const m = req.method; let mm0;
   const user = getUser(req, res);
   if (limited(req, 'api', 600, 60e3)) return fail(res, 429, 'Juda ko\'p so\'rov. Bir oz kuting.');
 
@@ -254,6 +265,45 @@ async function api(req, res, url) {
   // ---- admin ----
   if (p.startsWith('/api/admin/')) return await adminApi(req, res, url, p, m);
 
+  // ---- hisob (email + parol) ----
+  if (p === '/api/account/register' && m === 'POST') {
+    if (limited(req, 'acct', 10, 3600e3)) return fail(res, 429, 'Juda ko\'p urinish. Keyinroq urinib ko\'ring.');
+    const b = await readJson(req, 2000);
+    const email = String(b.email || '').trim().toLowerCase().slice(0, 120);
+    if (!EMAIL_RE.test(email)) return fail(res, 400, 'Email manzili noto\'g\'ri');
+    if (typeof b.password !== 'string' || b.password.length < 8 || b.password.length > 100) return fail(res, 400, 'Parol kamida 8 ta belgi bo\'lsin');
+    if (db.accounts[email]) return fail(res, 409, 'Bu email bilan hisob bor. "Kirish" bo\'limidan foydalaning.');
+    if (user.email) return fail(res, 409, 'Siz allaqachon hisobga kirgansiz');
+    db.accounts[email] = { email, pw: hashPassword(b.password), cid: user.cid, created: Date.now() };
+    user.email = email; store.save();
+    return json(res, 200, { me: meView(user, isAdmin(req)) });
+  }
+  if (p === '/api/account/login' && m === 'POST') {
+    if (limited(req, 'login', 15, 600e3)) return fail(res, 429, 'Juda ko\'p urinish. 10 daqiqadan so\'ng urinib ko\'ring.');
+    const b = await readJson(req, 2000);
+    const email = String(b.email || '').trim().toLowerCase().slice(0, 120);
+    const acc = db.accounts[email];
+    const ok = checkPassword(String(b.password || ''), acc ? acc.pw : hashPassword('x', '00'.repeat(8)));
+    if (!acc || !ok || !db.users[acc.cid]) return fail(res, 401, 'Email yoki parol noto\'g\'ri');
+    const target = db.users[acc.cid];
+    mergeUsers(user, target);
+    res.setHeader('Set-Cookie', cidCookie(acc.cid)); store.save();
+    return json(res, 200, { me: meView(target, isAdmin(req)) });
+  }
+  if (p === '/api/account/logout' && m === 'POST') {
+    res.setHeader('Set-Cookie', cidCookie('', 0)); return json(res, 200, { ok: true });
+  }
+  if (p === '/api/my/invites' && m === 'GET') {
+    const list = Object.values(db.invites).filter((i) => i.owner === user.cid).sort((a, b) => b.updated - a.updated).slice(0, 100)
+      .map((i) => ({ id: i.id, slug: i.slug, title: [i.state.n1, i.state.n2].filter(Boolean).join(' & ') || 'Taklifnoma', tpl: i.state.tpl, views: i.views, rsvps: i.rsvps.length, updated: i.updated }));
+    return json(res, 200, { invites: list });
+  }
+  mm0 = /^\/api\/my\/invites\/([a-f0-9]{16})$/.exec(p);
+  if (mm0 && m === 'GET') {
+    const inv = db.invites[mm0[1]]; if (!inv || inv.owner !== user.cid) return fail(res, 404, 'Topilmadi');
+    return json(res, 200, { id: inv.id, slug: inv.slug, state: inv.state });
+  }
+
   // ---- taklifnomalar ----
   if (p === '/api/invites' && m === 'POST') {
     if (limited(req, 'publish', 30, 3600e3)) return fail(res, 429, 'Juda ko\'p yaratish. Keyinroq urinib ko\'ring.');
@@ -278,7 +328,7 @@ async function api(req, res, url) {
   mm = /^\/api\/invites\/([a-f0-9]{16})$/.exec(p);
   if (mm && m === 'PUT') {
     const inv = db.invites[mm[1]]; if (!inv) return fail(res, 404, 'Topilmadi');
-    if (!checkToken(req, inv)) return fail(res, 403, 'Ruxsat yo\'q');
+    if (!canEdit(req, inv, user)) return fail(res, 403, 'Ruxsat yo\'q');
     const b = await readJson(req);
     inv.state = sanitizeState(b.state, isTpl); if (typeof b.og === 'string' && /^\/u\/[a-z0-9._-]{8,80}$/.test(b.og)) inv.og = b.og;
     inv.updated = Date.now(); store.save();
@@ -287,7 +337,7 @@ async function api(req, res, url) {
   mm = /^\/api\/invites\/([a-f0-9]{16})\/rsvp$/.exec(p);
   if (mm && m === 'GET') {
     const inv = db.invites[mm[1]]; if (!inv) return fail(res, 404, 'Topilmadi');
-    if (!checkToken(req, inv)) return fail(res, 403, 'Ruxsat yo\'q');
+    if (!canEdit(req, inv, user)) return fail(res, 403, 'Ruxsat yo\'q');
     return json(res, 200, { rsvps: inv.rsvps, views: inv.views });
   }
   mm = /^\/api\/invites\/([a-z0-9-]{3,40})\/rsvp$/.exec(p);
@@ -349,6 +399,16 @@ async function adminApi(req, res, url, p, m) {
     const name = crypto.createHash('sha1').update(body).digest('hex').slice(0, 24) + '.' + ext;
     const f = readyUpload(name); if (!fs.existsSync(f)) fs.writeFileSync(f, body);
     return json(res, 200, { url: '/u/' + name, size: body.length });
+  }
+  if (p === '/api/admin/accounts' && m === 'GET') {
+    const list = Object.values(db.accounts).sort((a, b) => b.created - a.created).slice(0, 500).map((a) => ({ email: a.email, created: a.created, invites: Object.values(db.invites).filter((i) => i.owner === a.cid).length }));
+    return json(res, 200, { accounts: list });
+  }
+  if (p === '/api/admin/accounts/reset' && m === 'POST') {
+    const b = await readJson(req, 2000); const acc = db.accounts[String(b.email || '').toLowerCase()];
+    if (!acc) return fail(res, 404, 'Hisob topilmadi');
+    if (typeof b.password !== 'string' || b.password.length < 8) return fail(res, 400, 'Parol kamida 8 ta belgi');
+    acc.pw = hashPassword(b.password); store.save(); return json(res, 200, { ok: true });
   }
   if (p === '/api/admin/poster' && m === 'POST') {
     // brauzer videoni o'qiy olmasa (masalan H.265), serverda ffmpeg bilan birinchi kadrni olamiz

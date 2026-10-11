@@ -33,12 +33,15 @@ Productionda: HTTPS (Nginx/Caddy) orqasida ishga tushiring, `BASE_URL=https://..
 
 ## Foydalanuvchi nima qila oladi
 
-- **Shablon**: 10 ta (Atlas, Suzani, Oltin, Minimal, Quvnoq, Tadbir, Navro'z, Hayit, Yangi yil, 8-mart) × 15 ta tadbir turi (nikoh, qiz uzatish, sunnat, beshik, tug'ilgan kun, yubiley, bitiruv, korporativ, mavlud, iftor, Navro'z, Hayit, Yangi yil, 8-mart, Ustozlar kuni).
+- **Shablon**: 20 ta (Atlas, Suzani, Oltin, Minimal, Quvnoq, Tadbir, Navro'z, Hayit, Yangi yil, 8-mart, Atirgul, Marmar, Boho, Kosmos, Tropik, Art-deko, Akvarel, Retro, Bitiruv, Nur) × 15 ta tadbir turi (nikoh, qiz uzatish, sunnat, beshik, tug'ilgan kun, yubiley, bitiruv, korporativ, mavlud, iftor, Navro'z, Hayit, Yangi yil, 8-mart, Ustozlar kuni).
 - **Matn**: ism, sana, vaqt, manzil, taklif matni; **Lotin / Кирилл / Русский** (tayyor matnlar tarjima, ismlar transliteratsiya qilinadi).
 - **Dizayn**: rang uslublari, o'z ranglari, shriftlar, formatlar (Story 9:16, 4:5, 1:1, 16:9, chop).
 - **Elementlar**: stikerlar (lola, anor, paxta, ikat, hilol…), rasm ramkalari (doira, mehrob, oval, yurak…), QR kod; surish, kattalashtirish, burish (sichqoncha va barmoq), bekor qilish/qaytarish, avtomatik saqlash (brauzerda).
 - **Yuklash**: PNG/JPG/shaffof PNG (1× va 2×), tez o'lchamlar; video 7/15/30/60 s (tayyor 5 ta musiqa, o'z musiqasi, mikrofon bilan ovozli tabrik); PDF A5/A6 (3 mm bleed + kesish belgilari) va A4 ga 4 tadan; ZIP — har bir mehmon ismi bilan.
 - **Ulashish**: jonli havola (`/i/nom`), QR (PNG), Telegram, WhatsApp, Facebook, SMS, Instagram (telefonda ulashish oynasi orqali), shaxsiy mehmon havolalari (`?g=Ism`) va CSV, RSVP ro'yxati.
+- **Sahifa paneli** (muharrirda): dastur (soat bo'yicha), kiyim kodi, aloqa (qo'ng'iroq + WhatsApp), tilak/sovg'a, 8 tagacha rasm galereyasi — jonli sahifada chiroyli bloklar bo'lib chiqadi.
+- **Mehmonlar boshqaruvi**: ro'yxat → har biriga shaxsiy havola, holat (keladi/balki/kelmaydi/kutilmoqda), filtr, CSV, keladiganlar ro'yxati, eslatma matni.
+- **Hisob (email + parol)**: ixtiyoriy. Kreditlar, ochilgan dizaynlar va jonli taklifnomalar hisobga bog'lanadi; boshqa qurilmadan kirib "Ishlarim → Jonli taklifnomalarim"dan tahrirlash mumkin. Email tasdiqlanmaydi va parol emailga tiklanmaydi — admin panelning "Hisoblar" bo'limidan parolni almashtirib beriladi.
 - **Jonli sahifa**: konvert ochilishi, animatsiya, musiqa, tadbirgacha sanoq (Toshkent vaqti), Yandex/Google/2GIS xaritasi, Google Calendar + .ics, RSVP formasi, OG-ko'rinish (Telegram/WhatsApp havola kartochkasi).
 
 ## Admin panel (`/admin`)

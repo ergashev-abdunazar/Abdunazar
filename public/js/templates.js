@@ -1,4 +1,4 @@
-// 10 ta shablon. Har biri: { id, name, tag, fx, fonts, pals, layout(ctx,S,D,P,fmt) -> {bg, extra, blocks} }
+// 20 ta shablon (10 tasi templates2.js da). Har biri: { id, name, tag, fx, fonts, pals, layout(ctx,S,D,P,fmt) -> {bg, extra, blocks} }
 import {
   fnt, text, paraFit, drawLines, rr, diamond, circle, rng, rgba, mix, star, sparkle, tulip,
   petalRing, medallion, branch, ikat, archPathE
@@ -6,6 +6,7 @@ import {
 import { stackLayout, applyFontOverrides, NAME_FONTS, BODY_FONTS, ornDiamond, ornLine, ornDots } from './layout.js';
 import { getImage, whenImage } from './items.js';
 import { drawCover } from './draw.js';
+import { NEW_TEMPLATES, NEW_ORDER } from './templates2.js';
 
 function done(ctx, S, D, cfg, fmt, box, bg) {
   applyFontOverrides(cfg, S);
@@ -705,7 +706,8 @@ export const TEMPLATES = {
       { bg1: '#ffe5cf', bg2: '#ffc9a3', petal1: '#ffffff', petal2: '#fff0e1', center: '#ff9f1c', leaf: '#5a9a4d', mimosa: '#ffcf33', ink: '#5b2a14', accent: '#e07a1f', bg: '#ffe5cf' }]
   }
 };
-export const TEMPLATE_ORDER = ['atlas', 'suzani', 'oltin', 'minimal', 'quvnoq', 'tadbir', 'navruz', 'hayit', 'yangiyil', 'mart8'];
+export const TEMPLATE_ORDER = ['atlas', 'suzani', 'oltin', 'minimal', 'quvnoq', 'tadbir', 'navruz', 'hayit', 'yangiyil', 'mart8', ...NEW_ORDER];
+Object.assign(TEMPLATES, NEW_TEMPLATES);
 
 
 /* ================= MAXSUS SHABLONLAR (admin yuklagan rasm/video fon) ================= */

@@ -16,13 +16,13 @@ const UI_LAT = {
   envTitle: 'Sizga taklifnoma', envSub: 'Ochish uchun bosing', open: 'Ochish', until: 'Tadbirgacha', d: 'kun', h: 'soat', m: 'daqiqa', s: 'soniya',
   started: 'Tadbir boshlandi', passed: 'Tadbir o\'tdi', when: 'Sana va vaqt', venue: 'Manzil', map: 'Xaritada ochish', cal: 'Kalendarga qo\'shish', ics: 'Faylni yuklash (.ics)',
   rsvp: 'Ishtirokingizni tasdiqlang', name: 'Ismingiz', yes: 'Kelaman', no: 'Kela olmayman', maybe: 'Balki', count: 'Necha kishi', note: 'Izoh (ixtiyoriy)', send: 'Yuborish',
-  thanks: 'Rahmat! Javobingiz qabul qilindi.', share: 'Do\'stlarga ulashish', made: 'Bu kabi taklifnomani o\'zingiz ham yarating', scroll: 'Pastga suring ↓', nameReq: 'Ismingizni kiriting', copy: 'Havolani nusxalash', copied: 'Nusxalandi'
+  thanks: 'Rahmat! Javobingiz qabul qilindi.', program: 'Dastur', dress: 'Kiyim kodi', gallery: 'Suratlar', wish: 'Tilak va sovg\'a', contact: 'Aloqa', call: 'Qo\'ng\'iroq qilish', share: 'Do\'stlarga ulashish', made: 'Bu kabi taklifnomani o\'zingiz ham yarating', scroll: 'Pastga suring ↓', nameReq: 'Ismingizni kiriting', copy: 'Havolani nusxalash', copied: 'Nusxalandi'
 };
 const UI_RU = {
   envTitle: 'Вам приглашение', envSub: 'Нажмите, чтобы открыть', open: 'Открыть', until: 'До события', d: 'дн.', h: 'час.', m: 'мин.', s: 'сек.',
   started: 'Событие началось', passed: 'Событие прошло', when: 'Дата и время', venue: 'Адрес', map: 'Открыть на карте', cal: 'Добавить в календарь', ics: 'Скачать файл (.ics)',
   rsvp: 'Подтвердите участие', name: 'Ваше имя', yes: 'Приду', no: 'Не смогу', maybe: 'Возможно', count: 'Сколько человек', note: 'Комментарий (необязательно)', send: 'Отправить',
-  thanks: 'Спасибо! Ваш ответ принят.', share: 'Поделиться с друзьями', made: 'Создайте такое же приглашение', scroll: 'Листайте вниз ↓', nameReq: 'Введите имя', copy: 'Скопировать ссылку', copied: 'Скопировано'
+  thanks: 'Спасибо! Ваш ответ принят.', program: 'Программа', dress: 'Дресс-код', gallery: 'Фотографии', wish: 'Пожелания', contact: 'Контакты', call: 'Позвонить', share: 'Поделиться с друзьями', made: 'Создайте такое же приглашение', scroll: 'Листайте вниз ↓', nameReq: 'Введите имя', copy: 'Скопировать ссылку', copied: 'Скопировано'
 };
 const slug = decodeURIComponent(location.pathname.split('/')[2] || '');
 
@@ -157,6 +157,24 @@ async function main() {
         h('a', { class: 'btn small', target: '_blank', rel: 'noopener', href: `https://yandex.com/maps/?text=${q}` }, 'Yandex Maps'),
         h('a', { class: 'btn small', target: '_blank', rel: 'noopener', href: `https://www.google.com/maps/search/?api=1&query=${q}` }, 'Google Maps'),
         h('a', { class: 'btn small', target: '_blank', rel: 'noopener', href: `https://2gis.uz/search/${q}` }, '2GIS'))));
+  }
+  const X = S.extra || {};
+  if (X.program && X.program.length) {
+    inner.append(card(UI.program, h('div', { class: 'timeline' }, X.program.map((r) => h('div', { class: 'tl-row' }, h('b', null, r.t || '•'), h('span', null, r.x))))));
+  }
+  if (X.dress) inner.append(card(UI.dress, h('div', { style: { fontSize: '17px', fontWeight: 700 } }, X.dress)));
+  if (X.gallery && X.gallery.length) {
+    const lb = h('div', { class: 'lightbox', hidden: true, onclick: () => { lb.hidden = true; } }, h('img', { alt: '' }));
+    document.body.append(lb);
+    inner.append(card(UI.gallery, h('div', { class: 'gal' }, X.gallery.map((u) => h('img', { src: u, alt: '', loading: 'lazy', onclick: () => { lb.firstChild.src = u; lb.hidden = false; } })))));
+  }
+  if (X.wish) inner.append(card(UI.wish, h('div', { style: { fontSize: '16px', lineHeight: '1.5' } }, X.wish)));
+  if (X.phone) {
+    const digits = X.phone.replace(/\D/g, '');
+    inner.append(card(UI.contact, X.cname ? h('div', { style: { fontWeight: 700, marginBottom: '4px' } }, X.cname) : null, h('div', { style: { color: '#7a7388', marginBottom: '12px' } }, X.phone),
+      h('div', { class: 'row', style: { justifyContent: 'center' } },
+        h('a', { class: 'btn small', href: 'tel:+' + digits.replace(/^\+/, '') }, UI.call),
+        h('a', { class: 'btn small', target: '_blank', rel: 'noopener', href: 'https://wa.me/' + digits }, 'WhatsApp'))));
   }
   function fmtUtc(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
   function gcal() {

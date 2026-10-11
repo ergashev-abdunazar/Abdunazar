@@ -3,6 +3,7 @@ import { core } from './core.js';
 import { api } from './api.js';
 import { h, toast, debounce, dataUrlToBlob } from './ui.js';
 import { makeQR, drawQR } from './qr.js';
+import { guestsCard } from './panels-guests.js';
 import { renderToCanvas, canvasToBlob, slugify, shareLinks, parseGuests, guestLink, saveBlob, canShareFiles, shareFiles, prepare, fileBase } from './exporters.js';
 
 const copy = async (t) => { try { await navigator.clipboard.writeText(t); toast('Nusxalandi', 'ok'); } catch (e) { toast('Nusxalab bo\'lmadi — qo\'lda belgilang', 'err'); } };
@@ -96,8 +97,7 @@ export function sharePanel(exp) {
       h('div', { class: 'row', style: { alignItems: 'flex-start' } }, h('div', { class: 'qr-box' }, qrc),
         h('div', { class: 'grow' }, h('p', { class: 'hint', style: { marginTop: 0 } }, 'Qog\'oz taklifnomaga yoki ekranga qo\'ying — mehmon skaner qilib jonli sahifani ochadi. Rasmning ichiga ham QR qo\'shish mumkin (Elementlar → QR kod).'),
           h('button', { class: 'btn small', onclick: async () => saveBlob(await canvasToBlob(qrCanvas(1024, 4)), fileBase(core.S) + '-qr.png') }, 'QR ni yuklab olish (PNG)')))));
-    frag.push(guestCard(link));
-    frag.push(rsvpCard());
+    frag.push(guestsCard(link, text));
     return frag;
   }
 

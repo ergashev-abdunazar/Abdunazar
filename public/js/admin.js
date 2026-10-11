@@ -70,7 +70,7 @@ async function boot() {
   }
   $('#app').hidden = false;
   $('#logout').onclick = async () => { await call('/api/admin/logout', 'POST'); location.reload(); };
-  const tabs = [['tpl', 'Shablonlar', tplTab], ['trk', 'Qo\'shiqlar', trackTab], ['promo', 'Promokodlar', promoTab], ['inv', 'Taklifnomalar', invTab], ['stat', 'Statistika', statTab], ['set', 'Sozlamalar', setTab]];
+  const tabs = [['tpl', 'Shablonlar', tplTab], ['trk', 'Qo\'shiqlar', trackTab], ['promo', 'Promokodlar', promoTab], ['inv', 'Taklifnomalar', invTab], ['acc', 'Hisoblar', accTab], ['stat', 'Statistika', statTab], ['set', 'Sozlamalar', setTab]];
   const bar = $('#tabs'), main = $('#main'); let cur = localStorage.getItem('adm:tab') || 'tpl';
   const btns = {};
   const show = async (id) => {
@@ -137,6 +137,19 @@ async function invTab() {
   const body = h('tbody', null, invites.map((i) => h('tr', null, h('td', null, h('a', { href: '/i/' + i.slug, target: '_blank' }, i.slug)), h('td', null, i.title), h('td', null, i.views), h('td', null, i.rsvps), h('td', null, new Date(i.created).toLocaleDateString('uz')),
     h('td', null, h('button', { class: 'btn small', style: { color: 'var(--err)' }, onclick: async (e) => { if (!confirm(`"${i.slug}" o'chirilsinmi? Havola ishlamay qoladi.`)) return; await call('/api/admin/invites/' + i.id, 'DELETE'); e.currentTarget.closest('tr').remove(); } }, '🗑')))));
   root.append(h('h2', null, 'Jonli taklifnomalar'), invites.length ? h('div', { style: { overflowX: 'auto' } }, h('table', { class: 'table' }, h('thead', null, h('tr', null, ['Havola', 'Nomi', 'Ko\'rish', 'RSVP', 'Sana', ''].map((x) => h('th', null, x)))), body)) : h('div', { class: 'hint' }, 'Hali taklifnoma yo\'q.'));
+  return root;
+}
+
+/* ---------------- hisoblar ---------------- */
+async function accTab() {
+  const { accounts } = await call('/api/admin/accounts'); const root = h('div');
+  const body = h('tbody', null, accounts.map((a) => h('tr', null, h('td', null, a.email), h('td', null, a.invites), h('td', null, new Date(a.created).toLocaleDateString('uz')),
+    h('td', null, h('button', { class: 'btn small', onclick: async () => {
+      const pw = prompt(`"${a.email}" uchun yangi parol (kamida 8 ta belgi):`); if (!pw) return;
+      try { await call('/api/admin/accounts/reset', 'POST', { email: a.email, password: pw }); toast('Parol almashtirildi', 'ok'); } catch (e) { toast(e.message, 'err'); }
+    } }, 'Parolni tiklash')))));
+  root.append(h('h2', null, 'Foydalanuvchi hisoblari'), h('p', { class: 'hint' }, 'Email tasdiqlash va emailga parol yuborish yo\'q. Foydalanuvchi parolini unutsa, shu yerdan yangi parol bering.'),
+    accounts.length ? h('div', { style: { overflowX: 'auto' } }, h('table', { class: 'table' }, h('thead', null, h('tr', null, ['Email', 'Taklifnoma', 'Sana', ''].map((x) => h('th', null, x)))), body)) : h('div', { class: 'hint' }, 'Hali hisob ochilmagan.'));
   return root;
 }
 

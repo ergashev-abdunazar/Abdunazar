@@ -91,6 +91,15 @@ export const core = {
     this.S = normalizeState(d.S); this.pub = d.pub || null; this.past = []; this.future = []; this.sel = -1;
     ls.set('tk:last', id); this.changed({ tpl: 1, items: 1 }); this.emit('history'); return true;
   },
+  importPublished(inv) {
+    const S = normalizeState({ ...inv.state, id: inv.state.id || uid() });
+    const had = this.loadWork(S.id);
+    if (!had) {
+      this.S = S; this.pub = { id: inv.id, slug: inv.slug, token: '' };
+      this.past = []; this.future = []; this.sel = -1; this.saveNow();
+    }
+    return S.id;
+  },
   fresh(type = 'nikoh', tpl) {
     let S = newState(type, 'lat'); if (tpl && TEMPLATES[tpl]) S = { ...S, tpl };
     this.S = normalizeState(S); this.pub = null; this.past = []; this.future = []; this.sel = -1;
