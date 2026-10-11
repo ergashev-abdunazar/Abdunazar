@@ -100,7 +100,7 @@ export function exportPanel() {
       let blob = r.blob, ext = r.ext, note = '';
       if (core.cfg.ffmpeg && core.serverOk) {
         pm.text('MP4 (H.264) ga aylantirilmoqda…'); pm.set(0.9);
-        try { blob = await api.convert(r.blob, r.ext); ext = 'mp4'; } catch (e) { note = 'Serverda MP4 ga aylantirib bo\'lmadi, asl fayl berildi.'; }
+        try { blob = await api.convert(r.blob, r.ext); ext = 'mp4'; } catch (e) { console.error('convert', e); note = 'Serverda MP4 ga aylantirib bo\'lmadi (' + (e.message || 'xato') + '). Asl fayl (' + r.ext.toUpperCase() + ') berildi — kompyuter va Telegramda ochiladi.'; }
       } else if (ext === 'webm') note = 'Fayl WebM formatida. Telegram va kompyuterda ochiladi; iPhone uchun MP4 server (ffmpeg) kerak.';
       pm.close();
       showVideo(blob, `${fileBase(S)}-${opt.vidFmt}.${ext}`, wm, note);

@@ -165,16 +165,17 @@ function convertVideo(input, ext) {
   return new Promise((resolve, reject) => {
     const id = rid(8); const inF = path.join(DATA, `cv-${id}.${ext === 'mp4' ? 'mp4' : 'webm'}`); const outF = path.join(DATA, `cv-${id}-out.mp4`);
     fs.writeFileSync(inF, input);
-    const args = ['-y', '-i', inF, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '21', '-pix_fmt', 'yuv420p', '-r', '30', '-vsync', 'cfr',
+    const args = ['-y', '-i', inF, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '23', '-threads', '2', '-pix_fmt', 'yuv420p', '-r', '30', '-vsync', 'cfr',
       '-c:a', 'aac', '-b:a', '128k', '-ar', '44100', '-movflags', '+faststart', outF];
     const p = spawn(FFMPEG, args, { stdio: ['ignore', 'ignore', 'pipe'] });
     let err = ''; p.stderr.on('data', (d) => { err = (err + d).slice(-600); });
     const timer = setTimeout(() => p.kill('SIGKILL'), 180e3);
     const clean = () => { fs.rm(inF, () => {}); fs.rm(outF, () => {}); };
     p.on('error', (e) => { clearTimeout(timer); clean(); reject(Object.assign(new Error('ffmpeg topilmadi'), { status: 501 })); });
+    p.on('close', () => { if (err && process.env.DEBUG_FFMPEG) console.error(err); });
     p.on('exit', (code) => {
       clearTimeout(timer);
-      if (code !== 0) { clean(); return reject(Object.assign(new Error('Konvertatsiya bajarilmadi'), { status: 500, detail: err })); }
+      if (code !== 0) { clean(); console.error('ffmpeg xato:', code, err); return reject(Object.assign(new Error('Konvertatsiya bajarilmadi (server resursi yetmadi)'), { status: 500, detail: err })); }
       const out = fs.readFileSync(outF); clean(); resolve(out);
     });
   });
